@@ -55,7 +55,7 @@ const register = (accno, name, password) => {
             balance: 0,
             password
         }
-
+        console.log(accountdetails);
         //   this.saveDetails()
         //   console.log(accountdetails);
         return {
@@ -68,6 +68,7 @@ const register = (accno, name, password) => {
 //--------------------------
 const login=(req,accn, passw)=>{
     if (accn in accountdetails) {
+        console.log("password is "+passw);
         if (passw == accountdetails[accn]["password"]) {
             
            req.session.currentUser = accountdetails[accn]['name']
@@ -84,7 +85,7 @@ const login=(req,accn, passw)=>{
             return {
                 status:false,
                 statusCode:422,
-                message:"inavlid"
+                message:"inavalid"
             }
         }
     } else {
@@ -98,20 +99,12 @@ const login=(req,accn, passw)=>{
 }
 
 
-deposit=(req,accn,pwd,amt)=>{
+deposit=(accn,pwd,amt)=>{
     var amd=parseInt(amt)
     //this.getDetails()
-    if(!req.session.currentUser){
-        return{
-            status:false,
-            statusCode:404,
-            message:"please login"
-        }
-    }
     if (accn in accountdetails) {
-      var usr=accountdetails[accn]["name"]
-      if (pwd ==accountdetails[accn]["password"]) {
-          
+      //var usr=accountdetails[accn]["name"]
+      if (pwd ==accountdetails[accn]["password"]) {  
         accountdetails[accn]['balance']+=amd
         return{
             status:true,
@@ -139,24 +132,18 @@ deposit=(req,accn,pwd,amt)=>{
   }
 
 
-  withdraw=(req,accn,pass,amt)=>{
+  withdraw=(accn,pass,amt)=>{
     var amd=parseInt(amt)
     var usr=accountdetails[accn]["name"]
     //this.getDetails()
-    if(!req.session.currentUser){
-        return{
-            status:false,
-            statusCode:404,
-            message:"please login"
-        }
-    }
+    
     if (accn in accountdetails) {
-      if (pass == accountdetails[accn]["password"]&&usr==currentUser) {
+      if (pass == accountdetails[accn]["password"]) {
           if(amt>accountdetails[accn]["balance"]){
             return{
                 status:false,
                 statusCode:422,
-                message:"insuffiecient balence"
+                message:"insuffiecient balance"
             
         }
           }
