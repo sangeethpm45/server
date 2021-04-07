@@ -30,15 +30,20 @@ app.use(express.json())
 app.get('/', (a, b) => {
     b.send("GET")
 })
+
 app.post('/register', (req, res) => {
-    const result = dataservice.register(req.body.accn, req.body.username, req.body.password)
-    console.log(res.status(result.statusCode).json(result));
-})
+    dataservice.register(req.body.accn, req.body.username, req.body.password).
+        then(result => { res.status(result.statusCode).json(result) })
+
+});
+
+
 
 app.post('/login', (req, res) => {
-    console.log(req.body.currentUser);
-    const result = dataservice.login(req, req.body.accn, req.body.password)
-    console.log(res.status(result.statusCode).json(result));
+    //console.log(req.body.currentUser);
+    dataservice.login(req, req.body.accn, req.body.password).
+        then(result => { res.status(result.statusCode).json(result) })
+
 })
 
 app.post('/deposit', Authenticate, (req, res) => {

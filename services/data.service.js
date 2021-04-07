@@ -1,3 +1,4 @@
+const db = require('./db')
 let accountdetails = {
     1000: {
         accno: 1000,
@@ -39,141 +40,137 @@ let accountdetails = {
 let currentUser;
 
 const register = (accno, name, password) => {
-    if (accno in accountdetails) {
+    return db.User.findOne({ accno }).then(result => {
 
-        return {
-            status: false,
-            statusCode:422,
-            message: "user exist please login"
-        }
+        if (result) {
 
-    }
-    else {
-        accountdetails[accno] = {
-            accno,
-            name,
-            balance: 0,
-            password
-        }
-        console.log(accountdetails);
-        //   this.saveDetails()
-        //   console.log(accountdetails);
-        return {
-            status: true,
-            statusCode:200,
-            message: "sucess"
-        }
-    }
-}
-//--------------------------
-const login=(req,accn, passw)=>{
-    if (accn in accountdetails) {
-        console.log("password is "+passw);
-        if (passw == accountdetails[accn]["password"]) {
-            
-           req.session.currentUser = accountdetails[accn]['name']
 
-            //this.saveDetails()
             return {
-                status:true,
-                statusCode:200,
-                message:"Login Sucess"
+                status: false,
+                statusCode: 422,
+                message: "user exist please login"
+            }
+        }
+        else {
+            const newUser = new db.User({
+                accno,
+                name,
+                balance: 0,
+                password
+            })
+            newUser.save()
+            return {
+                status: true,
+                statusCode: 200,
+                message: "sucess"
+            }
+        }
+    })
+}
+
+
+//--------------------------
+const login = (req, accno, passw) => {
+    accno = parseInt(accno)
+    return db.User.findOne({ accno, password: passw }).then(result => {
+        console.log(result)
+        if (result) {
+            req.session.currentUser=accno
+            return {
+                
+                status: true,
+                statusCode: 200,
+                message: "Login Sucess"
+            }
+        }
+
+        else {
+            return {
+                status: false,
+                statusCode: 422,
+                message: "invalid"
+            }
+        }
+    })
+}
+
+
+deposit = (accn, pwd, amt) => {
+    var amd = parseInt(amt)
+    //this.getDetails()
+    if (accn in accountdetails) {
+        //var usr=accountdetails[accn]["name"]
+        if (pwd == accountdetails[accn]["password"]) {
+            accountdetails[accn]['balance'] += amd
+            return {
+                status: true,
+                statusCode: 200,
+                message: "amount credited successfully new balance" + accountdetails[accn]['balance']
+            }
+            //this.saveDetails()
+        } else {
+            return {
+                status: false,
+                statusCode: 422,
+                message: "invalid"
             }
 
+
+        }
+    } else {
+        return {
+            status: false,
+            statusCode: 422,
+            message: "no user"
+        }
+
+    }
+}
+
+
+withdraw = (accn, pass, amt) => {
+    var amd = parseInt(amt)
+    var usr = accountdetails[accn]["name"]
+    //this.getDetails()
+
+    if (accn in accountdetails) {
+        if (pass == accountdetails[accn]["password"]) {
+            if (amt > accountdetails[accn]["balance"]) {
+                return {
+                    status: false,
+                    statusCode: 422,
+                    message: "insuffiecient balance"
+
+                }
+            }
+            else {
+                accountdetails[accn]['balance'] -= amd
+                return {
+                    status: true,
+                    statusCode: 200,
+                    message: "amount credited successfully new balance :" + accountdetails[accn]['balance']
+                }
+                // this.saveDetails()  
+            }
+
+
         } else {
-            
             return {
-                status:false,
-                statusCode:422,
-                message:"inavalid"
+                status: false,
+                statusCode: 422,
+                message: "invalid"
+
             }
         }
     } else {
-        
         return {
-            status:false,
-            statusCode:422,
-            message:"no user"
+            status: false,
+            statusCode: 422,
+            message: "no user"
         }
+
     }
 }
-
-
-deposit=(accn,pwd,amt)=>{
-    var amd=parseInt(amt)
-    //this.getDetails()
-    if (accn in accountdetails) {
-      //var usr=accountdetails[accn]["name"]
-      if (pwd ==accountdetails[accn]["password"]) {  
-        accountdetails[accn]['balance']+=amd
-        return{
-            status:true,
-            statusCode:200,
-            message:"amount credited successfully new balance"+accountdetails[accn]['balance']
-        }  
-          //this.saveDetails()
-      } else {
-          return{
-              status:false,
-              statusCode:422,
-              message:"inavlid"
-          }
-          
-          
-      }
-  } else {
-      return{
-          status:false,
-          statusCode:422,
-          message:"no user"
-      }
-      
-  }
-  }
-
-
-  withdraw=(accn,pass,amt)=>{
-    var amd=parseInt(amt)
-    var usr=accountdetails[accn]["name"]
-    //this.getDetails()
-    
-    if (accn in accountdetails) {
-      if (pass == accountdetails[accn]["password"]) {
-          if(amt>accountdetails[accn]["balance"]){
-            return{
-                status:false,
-                statusCode:422,
-                message:"insuffiecient balance"
-            
-        }
-          }
-          else{
-            accountdetails[accn]['balance']-=amd
-            return{
-                status:true,
-                statusCode:200,
-                message:"amount credited successfully new balance :"+accountdetails[accn]['balance']
-            }
-           // this.saveDetails()  
-          }
-        
-          
-      } else {
-          return{
-              status:false,
-              statusCode:422,
-              message:"invalid"
-          
-      }}
-  } else {
-      return{
-          status:false,
-          statusCode:422,
-          message:"no user"
-      }
-      
-  }
-  } 
 module.exports = {
     register,
     login,
