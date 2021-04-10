@@ -4,7 +4,7 @@ const User=mongoose.model('User',{
     accno: Number,
     name: String,
     balance: Number,
-    password: Number
+    password: String
 })
 
 module.exports={

@@ -1,7 +1,9 @@
 const express = require('express');
 const session = require('express-session');
 const dataservice = require('./services/data.service');
+const cors=require('cors');
 const app = express();
+app.use(cors({origin:"http://localhost:4200",credentials:true}))
 app.use(session({
     secret: "randomstring",
     resave: false,
@@ -32,7 +34,7 @@ app.get('/', (a, b) => {
 })
 
 app.post('/register', (req, res) => {
-    dataservice.register(req.body.accn, req.body.username, req.body.password).
+    dataservice.register(req.body.accno, req.body.name, req.body.password).
         then(result => { res.status(result.statusCode).json(result) })
 
 });
@@ -47,22 +49,22 @@ app.post('/login', (req, res) => {
 })
 
 app.post('/deposit', Authenticate, (req, res) => {
-    const result = dataservice.deposit(req.body.accn, req.body.pwd, req.body.amt)
-    console.log(res.status(result.statusCode).json(result));
+    dataservice.deposit(req.body.accn, req.body.pwd, req.body.amt).
+    then(result => { res.status(result.statusCode).json(result) })
 })
 
 app.post('/withdraw', Authenticate, (req, res) => {
-    const result = dataservice.withdraw(req.body.accn, req.body.pwd, req.body.amt)
-    console.log(res.status(result.statusCode).json(result));
+    dataservice.withdraw(req.body.accn, req.body.pwd, req.body.amt)
+    .then(result=>{res.status(result.statusCode).json(result)});
 })
 
-app.delete('/', (req, res) => {
-    res.send("delete")
-})
-app.put('/', (req, res) => {
-    res.send("put")
-})
+    app.delete('/', (req, res) => {
+        res.send("delete")
+    })
+    app.put('/', (req, res) => {
+        res.send("put")
+    })
 
-app.listen(3000, () => {
-    console.log("listening...");
-})
+    app.listen(3000, () => {
+        console.log("listening...");
+    })

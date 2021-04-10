@@ -1,44 +1,7 @@
 const db = require('./db')
-let accountdetails = {
-    1000: {
-        accno: 1000,
-        name: "userone",
-        balance: 6000,
-        password: "user1",
-    },
-    1001: {
-        accno: 1001,
-        name: "usertwo",
-        balance: 9000,
-        password: "user2",
-    },
-    1002: {
-        accno: 1002,
-        name: "userthree",
-        balance: 6000,
-        password: "user3",
-    },
-    1003: {
-        accno: 1003,
-        name: "userfour",
-        balance: 9000,
-        password: "user4",
-    },
-    1004: {
-        accno: 1004,
-        name: "userfive",
-        balance: 6000,
-        password: "user5",
-    },
-    1005: {
-        accno: 1005,
-        name: "usersix",
-        balance: 9000,
-        password: "user6",
-    }
-};
-let currentUser;
 
+let currentUser;
+//--------Register---------------------//
 const register = (accno, name, password) => {
     return db.User.findOne({ accno }).then(result => {
 
@@ -68,19 +31,23 @@ const register = (accno, name, password) => {
     })
 }
 
-
 //--------------------------
+
+//-------------Login---------------------------------//
+
 const login = (req, accno, passw) => {
     accno = parseInt(accno)
     return db.User.findOne({ accno, password: passw }).then(result => {
         console.log(result)
         if (result) {
+           
             req.session.currentUser=accno
             return {
                 
                 status: true,
                 statusCode: 200,
-                message: "Login Sucess"
+                message: "Login Sucess",
+                name:result.name
             }
         }
 
@@ -93,49 +60,50 @@ const login = (req, accno, passw) => {
         }
     })
 }
+//--------------------------------------------//
 
 
+//-------------Deposit-------------------------//
 deposit = (accn, pwd, amt) => {
     var amd = parseInt(amt)
     //this.getDetails()
-    if (accn in accountdetails) {
-        //var usr=accountdetails[accn]["name"]
-        if (pwd == accountdetails[accn]["password"]) {
-            accountdetails[accn]['balance'] += amd
-            return {
-                status: true,
-                statusCode: 200,
-                message: "amount credited successfully new balance" + accountdetails[accn]['balance']
-            }
-            //this.saveDetails()
-        } else {
+    return db.User.findOne({accno:accn,password:pwd}).then(user=>{
+        if(!user){
             return {
                 status: false,
                 statusCode: 422,
                 message: "invalid"
             }
-
+        }
+        else{
+            user.balance+=amd
+            user.save()
+            return {
+                status: true,
+                statusCode: 200,
+                message: +amd+"credited successfully.\nbalance:" + user.balance
+            }
 
         }
-    } else {
-        return {
-            status: false,
-            statusCode: 422,
-            message: "no user"
-        }
+    })}
+//---------------------------------------//
 
-    }
-}
-
+//---------Withdraw-------------------------------//
 
 withdraw = (accn, pass, amt) => {
     var amd = parseInt(amt)
-    var usr = accountdetails[accn]["name"]
-    //this.getDetails()
+    
+    return db.User.findOne({accno:accn,password:pass}).then(user=>{
+        if(!user){
+            return {
+                status: false,
+                statusCode: 422,
+                message: "invalid"
 
-    if (accn in accountdetails) {
-        if (pass == accountdetails[accn]["password"]) {
-            if (amt > accountdetails[accn]["balance"]) {
+            }
+        }
+        else{
+            if(user.balance<amd){
                 return {
                     status: false,
                     statusCode: 422,
@@ -143,38 +111,26 @@ withdraw = (accn, pass, amt) => {
 
                 }
             }
-            else {
-                accountdetails[accn]['balance'] -= amd
+            else{
+                user.balance-=amd
+                user.save()
                 return {
                     status: true,
                     statusCode: 200,
-                    message: "amount credited successfully new balance :" + accountdetails[accn]['balance']
+                    message: +amd+" debited successfully.\nbalance :" + user.balance
                 }
-                // this.saveDetails()  
-            }
-
-
-        } else {
-            return {
-                status: false,
-                statusCode: 422,
-                message: "invalid"
-
             }
         }
-    } else {
-        return {
-            status: false,
-            statusCode: 422,
-            message: "no user"
-        }
-
-    }
+    })
 }
+//-----------------------------------------------------------------
+
+
+
+
 module.exports = {
     register,
     login,
     deposit,
     withdraw
-
 }
