@@ -64,7 +64,7 @@ const login = (req, accno, passw) => {
 
 
 //-------------Deposit-------------------------//
-deposit = (accn, pwd, amt) => {
+const deposit = (accn, pwd, amt) => {
     var amd = parseInt(amt)
     //this.getDetails()
     return db.User.findOne({accno:accn,password:pwd}).then(user=>{
@@ -90,7 +90,7 @@ deposit = (accn, pwd, amt) => {
 
 //---------Withdraw-------------------------------//
 
-withdraw = (accn, pass, amt) => {
+ const withdraw = (accn, pass, amt) => {
     var amd = parseInt(amt)
     
     return db.User.findOne({accno:accn,password:pass}).then(user=>{
@@ -128,7 +128,7 @@ withdraw = (accn, pass, amt) => {
 
 
 
-module.exports = {
+module.exports = {   
     register,
     login,
     deposit,
