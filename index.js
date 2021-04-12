@@ -54,7 +54,7 @@ app.post('/deposit', Authenticate, (req, res) => {
 })
 
 app.post('/withdraw', Authenticate, (req, res) => {
-    dataservice.withdraw(req.body.accn, req.body.pwd, req.body.amt)
+    dataservice.withdraw(req,req.body.accn, req.body.pwd, req.body.amt)
     .then(result=>{res.status(result.statusCode).json(result)});
 })
 

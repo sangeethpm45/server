@@ -41,7 +41,7 @@ const login = (req, accno, passw) => {
         console.log(result)
         if (result) {
            
-            req.session.currentUser=accno
+            req.session.currentUser=result.accno
             return {
                 
                 status: true,
@@ -50,7 +50,6 @@ const login = (req, accno, passw) => {
                 name:result.name
             }
         }
-
         else {
             return {
                 status: false,
@@ -61,6 +60,8 @@ const login = (req, accno, passw) => {
     })
 }
 //--------------------------------------------//
+
+
 
 
 //-------------Deposit-------------------------//
@@ -88,9 +89,11 @@ const deposit = (accn, pwd, amt) => {
     })}
 //---------------------------------------//
 
+
+
 //---------Withdraw-------------------------------//
 
- const withdraw = (accn, pass, amt) => {
+ const withdraw = (req,accn, pass, amt) => {
     var amd = parseInt(amt)
     
     return db.User.findOne({accno:accn,password:pass}).then(user=>{
@@ -103,23 +106,33 @@ const deposit = (accn, pwd, amt) => {
             }
         }
         else{
-            if(user.balance<amd){
-                return {
-                    status: false,
-                    statusCode: 422,
-                    message: "insuffiecient balance"
-
+            if(req.session.currentUser==accn){
+                if(user.balance<amd){
+                    return {
+                        status: false,
+                        statusCode: 422,
+                        message: "insuffiecient balance"
+    
+                    }
+                }
+                else{
+                    user.balance-=amd
+                    user.save()
+                    return {
+                        status: true,
+                        statusCode: 200,
+                        message: +amd+" debited successfully.\nbalance :" + user.balance
+                    }
                 }
             }
             else{
-                user.balance-=amd
-                user.save()
                 return {
-                    status: true,
-                    statusCode: 200,
-                    message: +amd+" debited successfully.\nbalance :" + user.balance
+                    status: false,
+                    statusCode: 422,
+                    message:"permission denied"
                 }
             }
+            
         }
     })
 }
