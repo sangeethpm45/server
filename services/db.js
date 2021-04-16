@@ -5,6 +5,7 @@ const User=mongoose.model('User',{
     name: String,
     balance: Number,
     password: String
+    
 })
 
 module.exports={

@@ -38,7 +38,7 @@ const register = (accno, name, password) => {
 const login = (req, accno, passw) => {
     accno = parseInt(accno)
     return db.User.findOne({ accno, password: passw }).then(result => {
-        console.log(result)
+        
         if (result) {
            
             req.session.currentUser=result.accno
@@ -47,7 +47,8 @@ const login = (req, accno, passw) => {
                 status: true,
                 statusCode: 200,
                 message: "Login Sucess",
-                name:result.name
+                name:result.name,
+                acno:result.accno
             }
         }
         else {
