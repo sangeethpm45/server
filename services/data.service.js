@@ -4,7 +4,7 @@ let currentUser;
 //--------Register---------------------//
 const register = (accno, name, password) => {
     return db.User.findOne({ accno }).then(result => {
-
+    
         if (result) {
 
 
@@ -16,10 +16,10 @@ const register = (accno, name, password) => {
         }
         else {
             const newUser = new db.User({
-                accno,
-                name,
+                accno:accno,
+                name:name,
                 balance: 0,
-                password
+                password:password
             })
             newUser.save()
             return {
@@ -55,7 +55,7 @@ const login = (req, accno, passw) => {
             return {
                 status: false,
                 statusCode: 422,
-                message: "invalid"
+                message: "invalid username or password"
             }
         }
     })
